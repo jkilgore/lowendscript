@@ -7,7 +7,7 @@ function check_install {
         shift
         while [ -n "$1" ]
         do
-            DEBIAN_FRONTEND=noninteractive apt-get -q -y install "$1"
+            apt-get -q -y install "$1"
             print_info "$1 installed for $executable"
             shift
         done
@@ -19,7 +19,7 @@ function check_install {
 function check_remove {
     if [ -n "`which "$1" 2>/dev/null`" ]
     then
-        DEBIAN_FRONTEND=noninteractive apt-get -q -y remove --purge "$2"
+        apt-get -q -y remove --purge "$2"
         print_info "$2 removed"
     else
         print_warn "$2 is not installed"
@@ -282,51 +282,6 @@ END
     invoke-rc.d inetutils-syslogd start
 }
 
-function install_wordpress {
-    check_install wget wget
-    if [ -z "$1" ]
-    then
-        die "Usage: `basename $0` wordpress <hostname>"
-    fi
-
-    # Downloading the WordPress' latest and greatest distribution.
-    mkdir /tmp/wordpress.$$
-    wget -O - http://wordpress.org/latest.tar.gz | \
-        tar zxf - -C /tmp/wordpress.$$
-    mv /tmp/wordpress.$$/wordpress "/var/www/$1"
-    rm -rf /tmp/wordpress.$$
-    chown root:root -R "/var/www/$1"
-
-    # Setting up the MySQL database
-    dbname=`echo $1 | tr . _`
-    userid=`get_domain_name $1`
-    # MySQL userid cannot be more than 15 characters long
-    userid="${userid:0:15}"
-    passwd=`get_password "$userid@mysql"`
-    cp "/var/www/$1/wp-config-sample.php" "/var/www/$1/wp-config.php"
-    sed -i "s/database_name_here/$dbname/; s/username_here/$userid/; s/password_here/$passwd/" \
-        "/var/www/$1/wp-config.php"
-    mysqladmin create "$dbname"
-    echo "GRANT ALL PRIVILEGES ON \`$dbname\`.* TO \`$userid\`@localhost IDENTIFIED BY '$passwd';" | \
-        mysql
-
-    # Setting up Nginx mapping
-    cat > "/etc/nginx/sites-enabled/$1.conf" <<END
-server {
-    server_name $1;
-    root /var/www/$1;
-    include /etc/nginx/fastcgi_php;
-    location / {
-        index index.php;
-        if (!-e \$request_filename) {
-            rewrite ^(.*)$  /index.php last;
-        }
-    }
-}
-END
-    invoke-rc.d nginx reload
-}
-
 function print_info {
     echo -n -e '\e[1;36m'
     echo -n $1
@@ -396,13 +351,10 @@ system)
     install_syslogd
     install_dropbear
     ;;
-wordpress)
-    install_wordpress $2
-    ;;
 *)
     echo 'Usage:' `basename $0` '[option]'
     echo 'Available option:'
-    for option in system exim4 mysql nginx php wordpress
+    for option in system exim4 mysql nginx php
     do
         echo '  -' $option
     done
