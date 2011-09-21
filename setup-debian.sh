@@ -152,92 +152,10 @@ END
 }
 
 function install_php {
-    check_install php-cgi php5-cgi php5-cli php5-mysql
-    cat > /etc/init.d/php-cgi <<END
-#!/bin/bash
-### BEGIN INIT INFO
-# Provides:          php-cgi
-# Required-Start:    networking
-# Required-Stop:     networking
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# Short-Description: Start the PHP FastCGI processes web server.
-### END INIT INFO
-
-PATH=/sbin:/bin:/usr/sbin:/usr/bin
-NAME="php-cgi"
-DESC="php-cgi"
-PIDFILE="/var/run/www/php.pid"
-FCGIPROGRAM="/usr/bin/php-cgi"
-FCGISOCKET="/var/run/www/php.sock"
-FCGIUSER="www-data"
-FCGIGROUP="www-data"
-
-if [ -e /etc/default/php-cgi ]
-then
-    source /etc/default/php-cgi
-fi
-
-[ -z "\$PHP_FCGI_CHILDREN" ] && PHP_FCGI_CHILDREN=1
-[ -z "\$PHP_FCGI_MAX_REQUESTS" ] && PHP_FCGI_MAX_REQUESTS=5000
-
-ALLOWED_ENV="PATH USER PHP_FCGI_CHILDREN PHP_FCGI_MAX_REQUESTS FCGI_WEB_SERVER_ADDRS"
-
-set -e
-
-. /lib/lsb/init-functions
-
-case "\$1" in
-start)
-    unset E
-    for i in \${ALLOWED_ENV}; do
-        E="\${E} \${i}=\${!i}"
-    done
-    log_daemon_msg "Starting \$DESC" \$NAME
-    env - \${E} start-stop-daemon --start -x \$FCGIPROGRAM -p \$PIDFILE \\
-        -c \$FCGIUSER:\$FCGIGROUP -b -m -- -b \$FCGISOCKET
-    log_end_msg 0
-    ;;
-stop)
-    log_daemon_msg "Stopping \$DESC" \$NAME
-    if start-stop-daemon --quiet --stop --oknodo --retry 30 \\
-        --pidfile \$PIDFILE --exec \$FCGIPROGRAM
-    then
-        rm -f \$PIDFILE
-        log_end_msg 0
-    else
-        log_end_msg 1
-    fi
-    ;;
-restart|force-reload)
-    \$0 stop
-    sleep 1
-    \$0 start
-    ;;
-*)
-    echo "Usage: \$0 {start|stop|restart|force-reload}" >&2
-    exit 1
-    ;;
-esac
-exit 0
-END
-    chmod 755 /etc/init.d/php-cgi
+    check_install php5-cli php5-common php5-mysql php5-suhosin php5-gd
+    check_install php5-fpm php5-cgi php-pear php5-memcache php-apc
     mkdir -p /var/run/www
     chown www-data:www-data /var/run/www
-
-    cat > /etc/nginx/fastcgi_php <<END
-location ~ \.php$ {
-    include /etc/nginx/fastcgi_params;
-
-    fastcgi_index index.php;
-    fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-    if (-f \$request_filename) {
-        fastcgi_pass unix:/var/run/www/php.sock;
-    }
-}
-END
-    update-rc.d php-cgi defaults
-    invoke-rc.d php-cgi start
 }
 
 function install_syslogd {
