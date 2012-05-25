@@ -1,1 +1,23 @@
-FIXME the README!
+:Low End Bootstrap Scripts:
+This script is to setup low end virtual servers.
+
+:How to Use:
+wget --no-check-certificate https://raw.github.com/jkilgore/lowendscript/master/setup-debian.sh
+bash setup-debian.sh (system|exim4|nginx|mysql|php)
+
+:What It Does:
+system -- removes some commonly bundled applications for a minimal distro (apache2, bind9, samba, nscd, etc).
+exim4 -- installs as a replacement to sendmail with internet delivery enabled.
+nginx -- basic nginx install via apt-get
+mysql -- disables InnoDB and sets a new MySQL root password (which can be found in ~/.my.cnf)
+php -- installs PHP5 CLI, FPM, and CGI. FPM should reduce the need for custom FCGI handler.
+
+:App Replacements:
+openssh -- dropbear, invoked from xinetd
+rsyslog -- inetutils-syslogd
+sendmail -- exim4, optional
+
+This script is provided as is and depending on your base configuration your mileage may vary.
+
+Credits
+This project is a fork of https://github.com/lowendbox/lowendscript with a handful of tweaks for debian6 and newer app packages.
