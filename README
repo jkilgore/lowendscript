@@ -20,4 +20,4 @@ sendmail -- exim4, optional
 This script is provided as is and depending on your base configuration your mileage may vary.
 
 Credits
-This project is a fork of https://github.com/lowendbox/lowendscript with a handful of tweaks for debian6 and newer app packages.
+This project is a fork of https://github.com/lowendbox/lowendscript
