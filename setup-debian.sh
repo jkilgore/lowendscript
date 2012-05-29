@@ -81,7 +81,7 @@ function install_dropbear {
 
     # Disable SSH
     touch /etc/ssh/sshd_not_to_be_run
-    invoke-rc.d ssh stop
+    service ssh stop
 
     # Enable dropbear to start. We are going to use xinetd as it is just
     # easier to configure and might be used for other things.
@@ -98,7 +98,7 @@ service ssh
     disable         = no
 }
 END
-    invoke-rc.d xinetd restart
+    service xinetd restart
 }
 
 function install_exim4 {
@@ -108,7 +108,7 @@ function install_exim4 {
         sed -i \
             "s/dc_eximconfig_configtype='local'/dc_eximconfig_configtype='internet'/" \
             /etc/exim4/update-exim4.conf.conf
-        invoke-rc.d exim4 restart
+        service exim4 restart
     fi
 }
 
@@ -119,7 +119,7 @@ function install_mysql {
 
     # Install a low-end copy of the my.cnf to disable InnoDB, and then delete
     # all the related files.
-    invoke-rc.d mysql stop
+    service mysql stop
     rm -f /var/lib/mysql/ib*
     cat > /etc/mysql/conf.d/lowendbox.cnf <<END
 [mysqld]
@@ -127,7 +127,7 @@ key_buffer = 8M
 query_cache_size = 0
 skip-innodb
 END
-    invoke-rc.d mysql start
+    service mysql start
 
     # Generating a new password for the root user.
     passwd=`get_password root@mysql`
@@ -148,7 +148,7 @@ function install_nginx {
 server_names_hash_bucket_size 64;
 END
 
-    invoke-rc.d nginx restart
+    service nginx restart
 }
 
 function install_php {
@@ -163,7 +163,7 @@ function install_syslogd {
     # so many files (waste of fd). Just dump them into
     # /var/log/(cron/mail/messages)
     check_install /usr/sbin/syslogd inetutils-syslogd
-    invoke-rc.d inetutils-syslogd stop
+    service inetutils-syslogd stop
 
     for file in /var/log/*.log /var/log/mail.* /var/log/debug /var/log/syslog
     do
@@ -197,7 +197,7 @@ END
 }
 END
 
-    invoke-rc.d inetutils-syslogd start
+    service inetutils-syslogd start
 }
 
 function print_info {
@@ -231,7 +231,7 @@ function remove_unneeded {
     # Need to stop sendmail as removing the package does not seem to stop it.
     if [ -f /usr/lib/sm.bin/smtpd ]
     then
-        invoke-rc.d sendmail stop
+        Service sendmail stop
         check_remove /usr/lib/sm.bin/smtpd 'sendmail*'
     fi
 }
