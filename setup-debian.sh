@@ -121,12 +121,8 @@ function install_mysql {
     # all the related files.
     service mysql stop
     rm -f /var/lib/mysql/ib*
-    cat > /etc/mysql/conf.d/lowendbox.cnf <<END
-[mysqld]
-key_buffer = 8M
-query_cache_size = 0
-skip-innodb
-END
+    mv /etc/mysql/my.cnf /etc/mysql/my.cnf.orig
+    cp my.cnf /etc/mysql/
     service mysql start
 
     # Generating a new password for the root user.
@@ -143,9 +139,9 @@ END
 function install_nginx {
     check_install nginx nginx
     
-    # Need to increase the bucket size for Debian 5.
-    cat > /etc/nginx/conf.d/lowendbox.conf <<END
-server_names_hash_bucket_size 64;
+    # Copy conf file into directory
+    mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.orig
+    cp nginx.conf /etc/nginx/
 END
 
     service nginx restart
@@ -154,8 +150,10 @@ END
 function install_php {
     check_install php5-cli php5-common php5-mysql php5-suhosin php5-gd
     check_install php5-fpm php5-cgi php-pear php5-memcache php-apc
-    mkdir -p /var/run/www
-    chown www-data:www-data /var/run/www
+    mkdir -p /var/www
+    chown www-data:www-data /var/www
+    mv /etc/php5/fpm/php-fpm.conf /etc/php5/fpm/php-fpm.conf.orig
+    cp php-fpm.conf /etc/php5/fpm/
 }
 
 function install_syslogd {
