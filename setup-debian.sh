@@ -115,7 +115,6 @@ function install_exim4 {
 function install_mysql {
     # Install the MySQL packages
     check_install mysqld mysql-server
-    check_install mysql mysql-client
 
     # Install a low-end copy of the my.cnf to disable InnoDB, and then delete
     # all the related files.
