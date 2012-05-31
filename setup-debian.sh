@@ -142,7 +142,6 @@ function install_nginx {
     # Copy conf file into directory
     mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.orig
     cp nginx.conf /etc/nginx/
-END
 
     service nginx restart
 }
