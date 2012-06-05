@@ -9,7 +9,7 @@ bash setup-debian.sh (system|exim4|nginx|mysql|php)
 system -- removes some commonly bundled applications for a minimal distro (apache2, bind9, samba, nscd, etc).
 exim4 -- installs as a replacement to sendmail with internet delivery enabled.
 nginx -- basic nginx install via apt-get
-mysql -- disables InnoDB and sets a new MySQL root password (which can be found in ~/.my.cnf)
+mysql -- sets MySQL root password during install and disables InnoDB.
 php -- installs PHP5 CLI, FPM, and CGI. FPM should reduce the need for custom FCGI handler.
 
 :App Replacements:
