@@ -44,19 +44,6 @@ function die {
     exit 1
 }
 
-function get_domain_name() {
-    # Getting rid of the lowest part.
-    domain=${1%.*}
-    lowest=`expr "$domain" : '.*\.\([a-z][a-z]*\)'`
-    case "$lowest" in
-    com|net|org|gov|edu|co)
-        domain=${domain%.*}
-        ;;
-    esac
-    lowest=`expr "$domain" : '.*\.\([a-z][a-z]*\)'`
-    [ -z "$lowest" ] && echo "$domain" || echo "$lowest"
-}
-
 function get_password() {
     # Check whether our local salt is present.
     SALT=/var/lib/radom_salt
@@ -114,7 +101,7 @@ function install_exim4 {
 
 function install_mysql {
     # Install the MySQL packages
-    check_install mysql-server
+    check_install mysqld mysql-server
 
     # Install a low-end copy of the my.cnf to disable InnoDB, and then delete
     # all the related files.
@@ -123,16 +110,6 @@ function install_mysql {
     mv /etc/mysql/my.cnf /etc/mysql/my.cnf.orig
     cp my.cnf /etc/mysql/
     service mysql start
-
-    # Generating a new password for the root user.
-    passwd=`get_password root@mysql`
-    mysqladmin password "$passwd"
-    cat > ~/.my.cnf <<END
-[client]
-user = root
-password = $passwd
-END
-    chmod 600 ~/.my.cnf
 }
 
 function install_nginx {
