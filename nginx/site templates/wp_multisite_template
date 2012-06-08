@@ -1,0 +1,57 @@
+server {
+        listen 80;
+        server_name SITENAME.com www.SITENAME.com *.SITENAME.com;
+        root /var/www/SITENAME/public;
+
+        access_log /var/www/SITENAME/logs/access.log;
+        error_log /var/www/SITENAME/logs/error.log;
+
+        index index.html index.htm index.php;
+
+        client_max_body_size 4M;
+        client_body_buffer_size 128k;
+
+        location / {
+                try_files $uri $uri/ /index.php?$args;
+        }
+
+        # Add trailing slash to */wp-admin requests.
+        rewrite /wp-admin$ $scheme://$host$uri/ permanent;
+
+        # Directives to send expires headers and turn off 404 error logging.
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico)$ {
+                expires 24h;
+                log_not_found off;
+        }
+
+        # Pass uploaded files to wp-includes/ms-files.php.
+        rewrite /files/$ /index.php last;
+
+        # For multisite:  Use a caching plugin that creates symlinks to the correct subdirectory structure to get some performance gains.
+        set $cachetest "$document_root/wp-content/cache/ms-filemap/${host}${uri}";
+        if ($uri ~ /$) {
+                set $cachetest "";
+        }
+        if (-f $cachetest) {
+                # Rewrites the URI and stops rewrite processing so it doesn't start over and attempt to pass it to the next rule.
+                rewrite ^ /wp-content/cache/ms-filemap/${host}${uri} break;
+        }
+
+        if ($uri !~ wp-content/plugins) {
+                rewrite /files/(.+)$ /wp-includes/ms-files.php?file=$1 last;
+        }
+
+        # Uncomment one of the lines below for the appropriate caching plugin (if used).
+        #include global/wordpress-ms-subdir-wp-super-cache.conf;
+        #include global/wordpress-ms-subdir-w3-total-cache.conf;
+
+        # Rewrite multisite '.../wp-.*' and '.../*.php'.
+        if (!-e $request_filename) {
+                rewrite ^/[_0-9a-zA-Z-]+(/wp-.*) $1 last;
+                rewrite ^/[_0-9a-zA-Z-]+.*(/wp-admin/.*\.php)$ $1 last;
+                rewrite ^/[_0-9a-zA-Z-]+(/.*\.php)$ $1 last;
+}
+
+    include php_wp.conf;
+    include drop_wp.conf;
+}

@@ -1,0 +1,44 @@
+server {
+        listen 80;
+        server_name SITENAME.com *.SITENAME.com www.SITENAME.com;
+        root /var/www/SITENAME/public;
+
+        access_log /var/www/SITENAME/logs/access.log;
+        error_log /var/www/SITENAME/logs/error.log;
+
+        index index.html index.htm index.php;
+
+        location / {
+            error_page 404 = @wp;
+
+            location ~* \.(php|inc)$ {
+        # Forbid PHP on upload dirs
+        if ($uri ~ "uploads") {
+            return 403;
+                }
+
+                fastcgi_split_path_info ^(.+\.php)(/.+)$;
+                fastcgi_intercept_errors on;
+                include fastcgi_params;
+                fastcgi_pass php;
+            }
+
+        }
+
+        # Rewrite rules. Blog name must be removed.
+        location @wp {
+
+        # Redirect to files
+          rewrite ^(/[^/]+/)?files/(.+) /wp-includes/ms-files.php?file=$2 last;
+
+        # Match only one section
+          rewrite ^(/[^/]+)?(/wp-.*) $2 last;
+          rewrite ^(/[^/]+)?(/.*\.php) $2 last;
+
+        # Send everything else to index.php (permalinks)
+         rewrite ^/(.*)$ /index.php?q=$1 last;
+        }
+
+        include php.conf;
+        include drop_wp.conf;
+}
