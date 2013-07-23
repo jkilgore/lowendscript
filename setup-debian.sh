@@ -108,7 +108,7 @@ function install_mysql {
     service mysql stop
     rm -f /var/lib/mysql/ib*
     mv /etc/mysql/my.cnf /etc/mysql/my.cnf.orig
-    cp my.cnf /etc/mysql/
+    cp mysql/my.cnf /etc/mysql/
     service mysql start
 }
 
@@ -117,7 +117,7 @@ function install_nginx {
     
     # Copy conf file into directory
     mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.orig
-    cp nginx.conf /etc/nginx/
+    cp nginx/nginx.conf /etc/nginx/
 
     service nginx restart
 }
@@ -128,7 +128,7 @@ function install_php {
     mkdir -p /var/www
     chown www-data:www-data /var/www
     mv /etc/php5/fpm/php-fpm.conf /etc/php5/fpm/php-fpm.conf.orig
-    cp php-fpm.conf /etc/php5/fpm/
+    cp php-fpm/php-fpm.conf /etc/php5/fpm/
 }
 
 function install_syslogd {
