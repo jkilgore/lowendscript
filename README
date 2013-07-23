@@ -2,7 +2,8 @@
 This script is to setup low end virtual servers.
 
 :How to Use:
-wget --no-check-certificate https://raw.github.com/jkilgore/lowendscript/master/setup-debian.sh
+wget --no-check-certificate https://raw.github.com/jkilgore/lowendscript/master/lowendscript.tar.gz
+tar -xvzf lowendscript.tar.gz
 bash setup-debian.sh (system|exim4|nginx|mysql|php)
 
 :What It Does:
